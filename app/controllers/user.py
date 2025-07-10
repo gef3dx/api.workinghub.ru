@@ -1,7 +1,6 @@
 from typing import List
 
 from litestar import Controller, delete, get, post, put
-from litestar.di import Provide
 from litestar.exceptions import HTTPException
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
@@ -18,7 +17,6 @@ class UserController(Controller):
     """User controller."""
 
     path = "/users"
-    dependencies = {"user_service": Provide(get_user_service)}
 
     @post("/", status_code=HTTP_201_CREATED)
     async def create_user(

@@ -1,8 +1,6 @@
 from litestar import Litestar
 from litestar.config.cors import CORSConfig
-from litestar.exceptions import HTTPException
 from litestar.logging import LoggingConfig
-from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.config.settings import settings
 from app.controllers.user import UserController
@@ -39,9 +37,12 @@ def create_app() -> Litestar:
         configure_root_logger=True,
     )
 
+    # Define dependencies correctly
+    dependencies_config = dependencies
+
     return Litestar(
         route_handlers=[UserController],
-        dependencies=dependencies,
+        dependencies=dependencies_config,
         cors_config=cors_config,
         logging_config=logging_config,
         on_startup=[on_startup],

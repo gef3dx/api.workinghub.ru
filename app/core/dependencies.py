@@ -30,7 +30,7 @@ async def get_user_service(
 
 # Dependency providers
 dependencies = {
-    "db_session": Provide(get_db_session),
+    "session": Provide(get_db_session),
     "user_repository": Provide(get_user_repository),
     "user_service": Provide(get_user_service),
 }
