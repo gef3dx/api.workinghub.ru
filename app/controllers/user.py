@@ -5,6 +5,7 @@ from litestar.exceptions import HTTPException
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
 from app.core.dependencies import get_user_service
+from app.core.middleware import get_current_user
 from app.models.schemas.user import (
     UserCreateSchema,
     UserUpdateSchema,
@@ -20,9 +21,14 @@ class UserController(Controller):
 
     @post("/", status_code=HTTP_201_CREATED)
     async def create_user(
-        self, data: UserCreateSchema, user_service: UserServiceProtocol
+        self, data: UserCreateSchema, user_service: UserServiceProtocol, request
     ) -> UserResponseSchema:
         """Create new user."""
+        # Check if user is authenticated (optional, remove if public registration is needed)
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
         try:
             user = await user_service.create_user(data)
             return UserResponseSchema.from_entity(user)
@@ -31,9 +37,14 @@ class UserController(Controller):
 
     @get("/{user_id:int}", status_code=HTTP_200_OK)
     async def get_user_by_id(
-        self, user_id: int, user_service: UserServiceProtocol
+        self, user_id: int, user_service: UserServiceProtocol, request
     ) -> UserResponseSchema:
         """Get user by ID."""
+        # Check authentication
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
         user = await user_service.get_user_by_id(user_id)
         if not user:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
@@ -41,9 +52,14 @@ class UserController(Controller):
 
     @get("/uuid/{user_uuid:str}", status_code=HTTP_200_OK)
     async def get_user_by_uuid(
-        self, user_uuid: str, user_service: UserServiceProtocol
+        self, user_uuid: str, user_service: UserServiceProtocol, request
     ) -> UserResponseSchema:
         """Get user by UUID."""
+        # Check authentication
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
         user = await user_service.get_user_by_uuid(user_uuid)
         if not user:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
@@ -51,36 +67,56 @@ class UserController(Controller):
 
     @get("/username/{username:str}", status_code=HTTP_200_OK)
     async def get_user_by_username(
-        self, username: str, user_service: UserServiceProtocol
+        self, username: str, user_service: UserServiceProtocol, request
     ) -> UserResponseSchema:
         """Get user by username."""
+        # Check authentication
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
         user = await user_service.get_user_by_username(username)
         if not user:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
         return UserResponseSchema.from_entity(user)
 
-    # @get("/username/{email:str}", status_code=HTTP_200_OK)
-    # async def get_user_by_email(
-    #     self, email: str, user_service: UserServiceProtocol
-    # ) -> UserResponseSchema:
-    #     user = await user_service.get_by_email(email)
-    #     if not user:
-    #         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
-    #     return UserResponseSchema.from_entity(user)
-
     @get("/", status_code=HTTP_200_OK)
     async def get_all_users(
-        self, user_service: UserServiceProtocol, skip: int = 0, limit: int = 100
+        self,
+        user_service: UserServiceProtocol,
+        request,
+        skip: int = 0,
+        limit: int = 100,
     ) -> List[UserResponseSchema]:
         """Get all users."""
+        # Check authentication
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
         users = await user_service.get_all_users(skip=skip, limit=limit)
         return [UserResponseSchema.from_entity(user) for user in users]
 
     @put("/{user_id:int}", status_code=HTTP_200_OK)
     async def update_user(
-        self, user_id: int, data: UserUpdateSchema, user_service: UserServiceProtocol
+        self,
+        user_id: int,
+        data: UserUpdateSchema,
+        user_service: UserServiceProtocol,
+        request,
     ) -> UserResponseSchema:
         """Update user."""
+        # Check authentication
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
+        # Check if user can update (only own profile or admin)
+        if current_user.id != user_id:
+            raise HTTPException(
+                status_code=403, detail="Not authorized to update this user"
+            )
+
         try:
             user = await user_service.update_user(user_id, data)
             if not user:
@@ -93,9 +129,20 @@ class UserController(Controller):
 
     @delete("/{user_id:int}", status_code=HTTP_200_OK)
     async def delete_user(
-        self, user_id: int, user_service: UserServiceProtocol
+        self, user_id: int, user_service: UserServiceProtocol, request
     ) -> dict:
         """Delete user."""
+        # Check authentication
+        current_user = await get_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+
+        # Check if user can delete (only own profile or admin)
+        if current_user.id != user_id:
+            raise HTTPException(
+                status_code=403, detail="Not authorized to delete this user"
+            )
+
         deleted = await user_service.delete_user(user_id)
         if not deleted:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")

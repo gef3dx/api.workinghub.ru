@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import database_manager
 from app.repositories.user.implementation import UserRepository
 from app.services.user.implementation import UserService
+from app.services.auth.implementation import AuthService
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -28,9 +29,17 @@ async def get_user_service(
     return UserService(user_repository)
 
 
+async def get_auth_service(
+    user_repository: UserRepository = Provide(get_user_repository),
+) -> AuthService:
+    """Get auth service."""
+    return AuthService(user_repository)
+
+
 # Dependency providers
 dependencies = {
     "session": Provide(get_db_session),
     "user_repository": Provide(get_user_repository),
     "user_service": Provide(get_user_service),
+    "auth_service": Provide(get_auth_service),
 }

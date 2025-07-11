@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from os import getenv
 from pathlib import Path
+import secrets
 
 
 @dataclass(frozen=True)
@@ -19,7 +20,11 @@ class Settings:
     debug: bool = getenv("DEBUG", "False").lower() == "true"
 
     # Security
-    secret_key: str = getenv("SECRET_KEY", "secret-key")
+    secret_key: str = getenv("SECRET_KEY", secrets.token_urlsafe(32))
+
+    # JWT
+    jwt_algorithm: str = getenv("JWT_ALGORITHM", "HS256")
+    jwt_expire_minutes: int = int(getenv("JWT_EXPIRE_MINUTES", "30"))
 
 
 # Singleton instance

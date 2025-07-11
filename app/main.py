@@ -3,6 +3,7 @@ from litestar.config.cors import CORSConfig
 from litestar.logging import LoggingConfig
 
 from app.config.settings import settings
+from app.controllers.auth import AuthController
 from app.controllers.user import UserController
 from app.core.database import database_manager
 from app.core.dependencies import dependencies
@@ -41,7 +42,7 @@ def create_app() -> Litestar:
     dependencies_config = dependencies
 
     return Litestar(
-        route_handlers=[UserController],
+        route_handlers=[AuthController, UserController],
         dependencies=dependencies_config,
         cors_config=cors_config,
         logging_config=logging_config,
