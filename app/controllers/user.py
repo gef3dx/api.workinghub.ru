@@ -59,6 +59,15 @@ class UserController(Controller):
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
         return UserResponseSchema.from_entity(user)
 
+    # @get("/username/{email:str}", status_code=HTTP_200_OK)
+    # async def get_user_by_email(
+    #     self, email: str, user_service: UserServiceProtocol
+    # ) -> UserResponseSchema:
+    #     user = await user_service.get_by_email(email)
+    #     if not user:
+    #         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
+    #     return UserResponseSchema.from_entity(user)
+
     @get("/", status_code=HTTP_200_OK)
     async def get_all_users(
         self, user_service: UserServiceProtocol, skip: int = 0, limit: int = 100

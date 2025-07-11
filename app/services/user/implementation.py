@@ -43,6 +43,10 @@ class UserService(UserServiceProtocol):
         """Get all users."""
         return await self.user_repository.get_all(skip=skip, limit=limit)
 
+    async def get_by_email(self, email: str) -> Optional[User]:
+        """Get user by email."""
+        return await self.user_repository.get_by_email(email)
+
     async def update_user(self, user_id: int, data: UserUpdateSchema) -> Optional[User]:
         """Update user."""
         update_data = {}

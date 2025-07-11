@@ -24,6 +24,10 @@ class UserServiceProtocol(Protocol):
         """Get user by username."""
         ...
 
+    async def get_by_email(self, email: str) -> Optional[User]:
+        """Get user by email."""
+        ...
+
     async def get_all_users(self, skip: int = 0, limit: int = 100) -> List[User]:
         """Get all users."""
         ...
