@@ -1,4 +1,4 @@
-from litestar import Controller, post, get
+from litestar import Controller, post, get, Request
 from litestar.exceptions import HTTPException
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED
 
@@ -42,7 +42,7 @@ class AuthController(Controller):
             raise HTTPException(status_code=401, detail=str(e))
 
     @get("/me", status_code=HTTP_200_OK)
-    async def get_current_user_info(self, request) -> UserAuthSchema:
+    async def get_current_user_info(self, request: Request) -> UserAuthSchema:
         """Get current user info."""
         user = await get_current_user(request)
         if not user:

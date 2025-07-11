@@ -1,6 +1,6 @@
 from typing import List
 
-from litestar import Controller, delete, get, post, put
+from litestar import Controller, delete, get, post, put, Request
 from litestar.exceptions import HTTPException
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
@@ -21,7 +21,10 @@ class UserController(Controller):
 
     @post("/", status_code=HTTP_201_CREATED)
     async def create_user(
-        self, data: UserCreateSchema, user_service: UserServiceProtocol, request
+        self,
+        data: UserCreateSchema,
+        user_service: UserServiceProtocol,
+        request: Request,
     ) -> UserResponseSchema:
         """Create new user."""
         # Check if user is authenticated (optional, remove if public registration is needed)
@@ -37,7 +40,7 @@ class UserController(Controller):
 
     @get("/{user_id:int}", status_code=HTTP_200_OK)
     async def get_user_by_id(
-        self, user_id: int, user_service: UserServiceProtocol, request
+        self, user_id: int, user_service: UserServiceProtocol, request: Request
     ) -> UserResponseSchema:
         """Get user by ID."""
         # Check authentication
@@ -52,7 +55,7 @@ class UserController(Controller):
 
     @get("/uuid/{user_uuid:str}", status_code=HTTP_200_OK)
     async def get_user_by_uuid(
-        self, user_uuid: str, user_service: UserServiceProtocol, request
+        self, user_uuid: str, user_service: UserServiceProtocol, request: Request
     ) -> UserResponseSchema:
         """Get user by UUID."""
         # Check authentication
@@ -67,7 +70,7 @@ class UserController(Controller):
 
     @get("/username/{username:str}", status_code=HTTP_200_OK)
     async def get_user_by_username(
-        self, username: str, user_service: UserServiceProtocol, request
+        self, username: str, user_service: UserServiceProtocol, request: Request
     ) -> UserResponseSchema:
         """Get user by username."""
         # Check authentication
@@ -84,7 +87,7 @@ class UserController(Controller):
     async def get_all_users(
         self,
         user_service: UserServiceProtocol,
-        request,
+        request: Request,
         skip: int = 0,
         limit: int = 100,
     ) -> List[UserResponseSchema]:
@@ -103,7 +106,7 @@ class UserController(Controller):
         user_id: int,
         data: UserUpdateSchema,
         user_service: UserServiceProtocol,
-        request,
+        request: Request,
     ) -> UserResponseSchema:
         """Update user."""
         # Check authentication
@@ -129,7 +132,7 @@ class UserController(Controller):
 
     @delete("/{user_id:int}", status_code=HTTP_200_OK)
     async def delete_user(
-        self, user_id: int, user_service: UserServiceProtocol, request
+        self, user_id: int, user_service: UserServiceProtocol, request: Request
     ) -> dict:
         """Delete user."""
         # Check authentication
